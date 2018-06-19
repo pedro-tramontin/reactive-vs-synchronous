@@ -11,3 +11,5 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
       MONGO_INITDB_DATABASE: notes
+    volumes:
+      - ./src/main/resources/init-db:/docker-entrypoint-initdb.d

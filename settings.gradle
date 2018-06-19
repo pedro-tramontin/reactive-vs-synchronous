@@ -1,4 +1,4 @@
-rootProject.name = 'reactive-vs-synchronous'
-include 'sync-client'
+rootProject.name = 'spring-boot-test'
 include 'sync-server'
+include 'sync-client'
 
