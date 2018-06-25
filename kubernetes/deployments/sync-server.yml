@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-server
+  labels:
+    app: sync-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-server
+  template:
+    metadata:
+      labels:
+        app: sync-server
+    spec:
+      containers:
+      - name: sync-server
+        image: mongo
+        env:
+        - name: MONGODB_HOST
+          value: mongodb
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 0.2
+            memory: "10Mi"

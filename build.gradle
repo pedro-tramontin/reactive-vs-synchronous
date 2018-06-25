@@ -6,16 +6,16 @@ buildscript {
     }
     dependencies {
         classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.0.3.RELEASE'
+        classpath 'gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.19.2'
     }
 }
 
-group 'br.com.pedront'
-version '1.0-SNAPSHOT'
-
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+
+    group 'br.com.pedront'
+    version '1.0-SNAPSHOT'
 
     repositories {
         mavenCentral()
@@ -39,25 +39,5 @@ subprojects {
 
     dependencies {
         compileOnly 'org.projectlombok:lombok'
-        compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
-    }
-}
-
-project(':sync-server') {
-    dependencies {
-        compile 'org.springframework.boot:spring-boot-starter-web'
-        compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
-        compile 'ma.glasnost.orika:orika-core'
-        compile 'io.springfox:springfox-swagger-ui'
-        compile 'io.springfox:springfox-swagger2'
-    }
-}
-
-project(':sync-client') {
-    dependencies {
-        compile 'org.springframework.boot:spring-boot-starter'
-        compile 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
-        compile project(':sync-server')
     }
 }

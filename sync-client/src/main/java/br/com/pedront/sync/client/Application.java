@@ -26,7 +26,6 @@ public class Application {
         return args -> {
 
             NoteVO note = new NoteVO();
-            note.setDescription("teste");
 
             System.out.println(syncServer.create(note));
 

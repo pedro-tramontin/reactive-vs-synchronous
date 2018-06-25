@@ -1,15 +1,31 @@
 version: '3.1'
 
 services:
-  mongo:
+  mongodb:
     image: mongo
     command: --smallfiles
     restart: always
-    ports:
-      - 27017:27017
+    #ports:
+    #  - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
       MONGO_INITDB_DATABASE: notes
     volumes:
-      - ./src/main/resources/init-db:/docker-entrypoint-initdb.d
+      - ./sync-server/src/main/resources/init-db:/docker-entrypoint-initdb.d
+    deploy:
+      resources:
+        limits:
+          cpus: '5.00'
+          memory: 128M
+        reservations:
+          cpus: '1.00'
+          memory: 128M
+  sync-server:
+    image: pedront/rvss-sync-server:latest
+    environment:
+      MONGODB_HOST: mongodb
+    ports:
+      - 8080:8080
+    depends_on:
+      - "mongodb"
