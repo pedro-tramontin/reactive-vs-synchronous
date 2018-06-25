@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: mongodb
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: mongodb
-        image: gcr.io/reactive-vs-synchronous/rvss-sync-server:v1
+        image: gcr.io/reactive-vs-synchronous/rvss-mongodb:v1
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
           value: root

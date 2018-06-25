@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: sync-server
@@ -16,13 +16,13 @@ spec:
     spec:
       containers:
       - name: sync-server
-        image: mongo
+        image: gcr.io/reactive-vs-synchronous/rvss-sync-server:v1
         env:
         - name: MONGODB_HOST
           value: mongodb
         ports:
         - containerPort: 8080
-        resources:
-          limits:
-            cpu: 0.2
-            memory: "10Mi"
+#        resources:
+#          limits:
+#            cpu: 1.0
+#            memory: 200Mi

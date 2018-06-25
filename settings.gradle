@@ -2,4 +2,4 @@ rootProject.name = 'reactive-vs-synchronous'
 include 'sync-server'
 include 'sync-client'
 include 'dto'
-
+include 'mongodb'

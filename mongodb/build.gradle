@@ -1,0 +1,9 @@
+apply plugin: 'com.palantir.docker'
+
+docker {
+    dependsOn build
+    name 'pedront/rvss-mongodb'
+    tags 'latest'
+    dockerfile file('Dockerfile')
+    files 'init-db.js'
+}
