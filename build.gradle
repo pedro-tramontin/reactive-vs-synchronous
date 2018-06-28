@@ -30,7 +30,7 @@ subprojects {
             dependency 'org.projectlombok:lombok:1.16.22'
             dependency 'ma.glasnost.orika:orika-core:1.5.2'
 
-            dependencySet(group: 'io.springfox', version: '2.7.0') {
+            dependencySet(group: 'io.springfox', version: '2.9.2') {
                 entry 'springfox-swagger-ui'
                 entry 'springfox-swagger2'
             }

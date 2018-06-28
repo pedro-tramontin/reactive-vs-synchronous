@@ -1,0 +1,30 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: async-jmeter
+  labels:
+    app: async-jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: async-jmeter
+  template:
+    metadata:
+      labels:
+        app: async-jmeter
+    spec:
+      containers:
+      - name: async-jmeter
+        image: gcr.io/reactive-vs-synchronous/rvss-jmeter:latest
+        env:
+        - name: SERVER_HOST
+          value: 35.199.81.76
+        volumeMounts:
+        - mountPath: /jmeter/out
+          name: jmeter-async-volume
+      volumes:
+        - name: jmeter-async-volume
+          gcePersistentDisk:
+            pdName: jmeter-async
+            fsType: ext4

@@ -1,0 +1,30 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sync-jmeter
+  labels:
+    app: sync-jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-jmeter
+  template:
+    metadata:
+      labels:
+        app: sync-jmeter
+    spec:
+      containers:
+      - name: sync-jmeter
+        image: gcr.io/reactive-vs-synchronous/rvss-jmeter:latest
+        env:
+        - name: SERVER_HOST
+          value: 35.198.4.14
+        volumeMounts:
+        - mountPath: /jmeter/out
+          name: jmeter-sync-volume
+      volumes:
+        - name: jmeter-sync-volume
+          gcePersistentDisk:
+            pdName: jmeter-sync
+            fsType: ext4

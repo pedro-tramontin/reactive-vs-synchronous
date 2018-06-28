@@ -3,8 +3,8 @@ package br.com.pedront.sync.server.config;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import springfox.documentation.builders.PathSelectors;
@@ -15,7 +15,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@EnableMongoRepositories("br.com.pedront.sync.server")
+@EnableMongoRepositories("br.com.pedront.sync.server.repository")
+@EnableFeignClients("br.com.pedront.sync.server.client")
 public class AppConfiguration {
 
     @Bean

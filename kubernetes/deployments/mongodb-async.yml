@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: mongodb-async
+  labels:
+    app: mongodb-async
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb-async
+  template:
+    metadata:
+      labels:
+        app: mongodb-async
+    spec:
+      containers:
+      - name: mongodb-async
+        image: gcr.io/reactive-vs-synchronous/rvss-mongodb:latest
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: root
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: 1qaz2wsx
+        - name: MONGO_INITDB_DATABASE
+          value: notes
+        ports:
+        - containerPort: 27017

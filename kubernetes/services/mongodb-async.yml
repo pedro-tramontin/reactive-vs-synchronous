@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-async
+spec:
+  selector:
+    app: mongodb-async
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017

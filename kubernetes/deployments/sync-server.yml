@@ -16,13 +16,9 @@ spec:
     spec:
       containers:
       - name: sync-server
-        image: gcr.io/reactive-vs-synchronous/rvss-sync-server:v1
+        image: gcr.io/reactive-vs-synchronous/rvss-sync-server:latest
         env:
         - name: MONGODB_HOST
-          value: mongodb
+          value: mongodb-sync
         ports:
         - containerPort: 8080
-#        resources:
-#          limits:
-#            cpu: 1.0
-#            memory: 200Mi
