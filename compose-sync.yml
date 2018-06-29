@@ -1,0 +1,10 @@
+version: '3.1'
+
+services:
+
+  jmeter:
+    image: pedront/rvss-jmeter:latest
+    environment:
+      SERVER_HOST: 35.224.174.252
+    volumes:
+      - ./kubernetes:/jmeter/out/

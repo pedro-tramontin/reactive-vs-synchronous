@@ -1,43 +1,73 @@
 version: '3.1'
 
 services:
-#  mongodb-sync:
-#    image: pedront/rvss-mongodb
-#    restart: always
+
+  mongodb-sync:
+    image: pedront/rvss-mongodb
 #    ports:
 #      - 27017:27017
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
-#      MONGO_INITDB_DATABASE: notes
-#  sync-server:
-#    image: pedront/rvss-sync-server:latest
-#    environment:
-#      MONGODB_HOST: mongodb-sync
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
+      MONGO_INITDB_DATABASE: notes
+    networks:
+      - sync-net
+
+  backend-sync:
+    image: pedront/rvss-backend
 #    ports:
 #      - 8080:8080
-#    depends_on:
-#      - "mongodb-sync"
-#  mongodb-async:
-#    image: pedront/rvss-mongodb
-#    restart: always
+    networks:
+      - sync-net
+
+  server-sync:
+    image: pedront/rvss-sync-server:latest
+    environment:
+      MONGODB_HOST: mongodb-sync
+      BACKEND_HOST: backend-sync
+    ports:
+      - 8081:8080
+    networks:
+      - sync-net
+    depends_on:
+      - "mongodb-sync"
+      - "backend-sync"
+
+  mongodb-async:
+    image: pedront/rvss-mongodb
+    restart: always
 #    ports:
 #      - 27018:27017
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: root
-#      MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
-#      MONGO_INITDB_DATABASE: notes
-#  async-server:
-#    image: pedront/rvss-async-server:latest
-#    environment:
-#      MONGODB_HOST: mongodb-async
-#    ports:
-#      - 8081:8080
-#    depends_on:
-#      - "mongodb-async"
-  jmeter:
-    image: pedront/rvss-jmeter:latest
     environment:
-      SERVER_HOST: 35.199.81.76
-    volumes:
-      - ./kubernetes:/jmeter/out/
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1qaz2wsx
+      MONGO_INITDB_DATABASE: notes
+    networks:
+      - async-net
+
+  backend-async:
+    image: pedront/rvss-backend
+#    ports:
+#      - 8090:8080
+    networks:
+       - async-net
+
+  server-async:
+    image: pedront/rvss-async-server:latest
+    environment:
+      MONGODB_HOST: mongodb-async
+      BACKEND_HOST: backend-async
+    ports:
+      - 8091:8080
+    networks:
+      - async-net
+    depends_on:
+      - "mongodb-async"
+      - "backend-async"
+
+networks:
+  sync-net:
+    driver: bridge
+  async-net:
+    driver: bridge
+    

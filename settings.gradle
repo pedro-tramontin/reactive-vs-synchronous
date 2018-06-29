@@ -5,4 +5,5 @@ include 'dto'
 include 'mongodb'
 include 'jmeter'
 include 'backend'
+include 'docktest'
 

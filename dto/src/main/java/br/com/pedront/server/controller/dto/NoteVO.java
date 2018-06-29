@@ -1,4 +1,4 @@
-package br.com.pedront.async.server.controller.dto;
+package br.com.pedront.server.controller.dto;
 
 import lombok.Data;
 

@@ -20,5 +20,7 @@ spec:
         env:
         - name: MONGODB_HOST
           value: mongodb-sync
+        - name: BACKEND_HOST
+          value: backend-sync
         ports:
         - containerPort: 8080

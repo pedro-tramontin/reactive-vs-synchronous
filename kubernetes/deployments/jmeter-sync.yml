@@ -1,30 +1,32 @@
-apiVersion: apps/v1beta1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: sync-jmeter
   labels:
     app: sync-jmeter
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: sync-jmeter
   template:
     metadata:
-      labels:
-        app: sync-jmeter
+      name: sync-jmeter
     spec:
       containers:
-      - name: sync-jmeter
-        image: gcr.io/reactive-vs-synchronous/rvss-jmeter:latest
-        env:
-        - name: SERVER_HOST
-          value: 35.198.4.14
-        volumeMounts:
-        - mountPath: /jmeter/out
-          name: jmeter-sync-volume
+        - image: gcr.io/reactive-vs-synchronous/rvss-jmeter:latest
+          name: sync-jmeter
+          env:
+          - name: SERVER_HOST
+            value: 130.211.157.69
+          - name: NUM_THREADS
+            value: "4000"
+          - name: RAMPUP_PERIOD
+            value: "360"
+          - name: LOOP_COUNT
+            value: "50"
+          volumeMounts:
+          - mountPath: /jmeter/out
+            name: jmeter-sync-volume
+      restartPolicy: Never
       volumes:
-        - name: jmeter-sync-volume
-          gcePersistentDisk:
-            pdName: jmeter-sync
-            fsType: ext4
+      - name: jmeter-sync-volume
+        gcePersistentDisk:
+          pdName: jmeter-sync
+          fsType: ext4
