@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: async-server
+  name: server-sync
 spec:
   selector:
-    app: async-server
+    app: server-sync
   ports:
     - protocol: TCP
       port: 8080

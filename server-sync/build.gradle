@@ -15,7 +15,7 @@ dependencies {
 
 docker {
     dependsOn build
-    name 'pedront/rvss-sync-server'
+    name 'pedront/rvss-server-sync'
     tags 'latest'
     dockerfile file('Dockerfile')
     files bootJar.archivePath

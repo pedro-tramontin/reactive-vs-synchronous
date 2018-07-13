@@ -1,9 +1,6 @@
 rootProject.name = 'reactive-vs-synchronous'
-include 'sync-server'
-include 'async-server'
 include 'dto'
-include 'mongodb'
-include 'jmeter'
 include 'backend'
-include 'docktest'
-
+include 'server-sync'
+include 'server-async'
+include 'jmeter'

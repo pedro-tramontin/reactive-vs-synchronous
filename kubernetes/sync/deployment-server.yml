@@ -1,26 +1,26 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: async-server
+  name: server-sync
   labels:
-    app: async-server
+    app: server-sync
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: async-server
+      app: server-sync
   template:
     metadata:
       labels:
-        app: async-server
+        app: server-sync
     spec:
       containers:
-      - name: async-server
-        image: gcr.io/reactive-vs-synchronous/rvss-async-server:latest
+      - name: server-sync
+        image: gcr.io/reactive-vs-synchronous/rvss-server-sync:latest
         env:
         - name: MONGODB_HOST
-          value: mongodb-async
+          value: mongodb-sync
         - name: BACKEND_HOST
-          value: backend-async
+          value: backend-sync
         ports:
         - containerPort: 8080
