@@ -28,13 +28,13 @@ echo "Getting auth for the async cluster"
 gcloud container clusters get-credentials async
 
 echo "Creating reactive backend"
-kubectl create -f ../kubernetes/async/deployment-backend.yml
+kubectl create -f kubernetes/async/deployment-backend.yml
 
 echo "Creating service for the reactive backend"
-kubectl create -f ../kubernetes/async/service-backend.yml
+kubectl create -f kubernetes/async/service-backend.yml
 
 echo "Creating reactive server"
-kubectl create -f ../kubernetes/async/deployment-server.yml
+kubectl create -f kubernetes/async/deployment-server.yml
 
 echo "Creating service for the reactive server"
-kubectl create -f ../kubernetes/async/service-server.yml
+kubectl create -f kubernetes/async/service-server.yml

@@ -10,17 +10,21 @@ spec:
       name: async-jmeter
     spec:
       containers:
-        - image: gcr.io/reactive-vs-synchronous/rvss-jmeter:latest
+        - image: gcr.io/reactive-test/rvss-jmeter:latest
           name: async-jmeter
           env:
           - name: SERVER_HOST
-            value: 35.238.137.4
+            value: %%SERVER_HOST%%
           - name: NUM_THREADS
             value: "4000"
           - name: RAMPUP_PERIOD
             value: "360"
           - name: LOOP_COUNT
             value: "50"
+          - name: OUT_DIR
+            value: "out/async/report"
+          - name: OUT_RESULTS
+            value: "out/async/results.csv"
           volumeMounts:
           - mountPath: /jmeter/out
             name: jmeter-async-volume

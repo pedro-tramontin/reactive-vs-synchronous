@@ -28,13 +28,13 @@ echo "Getting auth for the sync cluster"
 gcloud container clusters get-credentials sync
 
 echo "Creating synchronous backend"
-kubectl create -f ../kubernetes/sync/deployment-backend.yml
+kubectl create -f kubernetes/sync/deployment-backend.yml
 
 echo "Creating service for the synchronous backend"
-kubectl create -f ../kubernetes/sync/service-backend.yml
+kubectl create -f kubernetes/sync/service-backend.yml
 
 echo "Creating synchronous server"
-kubectl create -f ../kubernetes/sync/deployment-server.yml
+kubectl create -f kubernetes/sync/deployment-server.yml
 
 echo "Creating service for the synchronous server"
-kubectl create -f ../kubernetes/sync/service-server.yml
+kubectl create -f kubernetes/sync/service-server.yml

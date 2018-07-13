@@ -36,11 +36,14 @@ then
   exit $?
 fi
 
+repo="$docker_repository"
+gcr="$docker_registry/$gc_project"
+
 echo "Tagging images"
-docker tag $docker_repository/rvss-backend $docker_registry/$gc_project/rvss-backend:latest
-docker tag $docker_repository/rvss-server-sync $docker_registry/$gc_project/rvss-server-sync:latest
-docker tag $docker_repository/rvss-server-async $docker_registry/$gc_project/rvss-server-async:latest
-docker tag $docker_repository/rvss-jmeter $docker_registry/$gc_project/rvss-jmeter:latest
+docker tag $repo/rvss-backend $gcr/rvss-backend:latest
+docker tag $repo/rvss-server-sync $gcr/rvss-server-sync:latest
+docker tag $repo/rvss-server-async $gcr/rvss-server-async:latest
+docker tag $repo/rvss-jmeter $gcr/rvss-jmeter:latest
 
 if [ $? -ne 0 ]
 then
@@ -49,13 +52,31 @@ then
 fi
 
 echo "Pushing images"
-docker push $docker_registry/$gc_project/rvss-backend:latest
-docker push $docker_registry/$gc_project/rvss-server-sync:latest
-docker push $docker_registry/$gc_project/rvss-server-async:latest
-docker push $docker_registry/$gc_project/rvss-jmeter:latest
+docker push $gcr/rvss-backend:latest
+docker push $gcr/rvss-server-sync:latest
+docker push $gcr/rvss-server-async:latest
+docker push $gcr/rvss-jmeter:latest
 
 if [ $? -ne 0 ]
 then
   echo "Pushing images error...exiting."
   exit $?
 fi
+
+source scripts/kubernetes_sync.sh
+
+source scripts/check_endpoint.sh server-sync
+
+export SERVER_SYNC_IP=$external_ip
+
+echo "Sync server external IP: $SERVER_SYNC_IP"
+
+source scripts/kubernetes_async.sh
+
+source scripts/check_endpoint.sh server-async
+
+export SERVER_ASYNC_IP=$external_ip
+
+echo "Reactive server external IP: $SERVER_ASYNC_IP"
+
+source scripts/kubernetes_jmeter.sh

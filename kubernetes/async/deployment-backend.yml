@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: backend-async
-        image: gcr.io/reactive-vs-synchronous/rvss-backend:latest
+        image: gcr.io/reactive-test/rvss-backend:latest
         ports:
         - containerPort: 8080

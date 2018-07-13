@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: server-sync
-        image: gcr.io/reactive-vs-synchronous/rvss-server-sync:latest
+        image: gcr.io/reactive-test/rvss-server-sync:latest
         env:
         - name: MONGODB_HOST
           value: mongodb-sync

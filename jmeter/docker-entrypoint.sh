@@ -10,6 +10,6 @@ rm -rf out/report
   -n \
   -f \
   -t test.jmx \
-  -l out/results.csv \
+  -l $OUT_RESULTS \
   -e \
-  -o out/report
+  -o $OUT_DIR

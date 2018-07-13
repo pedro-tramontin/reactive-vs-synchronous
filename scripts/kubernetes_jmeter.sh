@@ -27,8 +27,14 @@ shift "$((OPTIND - 1))"
 echo "Getting auth for the jmeter cluster"
 gcloud container clusters get-credentials jmeter
 
+echo "Creating volume for synchronous server"
+gcloud compute disks create --size=1GB --zone=$zone jmeter-sync-volume
+
 echo "Creating JMeter for the synchronous server"
-kubectl create -f ../kubernetes/jmeter/jmeter-sync.yml
+cat kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
+
+echo "Creating volume for reactive server"
+gcloud compute disks create --size=1GB --zone=$zone jmeter-async-volume
 
 echo "Creating JMeter for the reactive server"
-kubectl create -f ../kubernetes/jmeter/jmeter-async.yml
+cat kubernetes/jmeter/jmeter-async.yml | sed "s/%%SERVER_HOST%%/$SERVER_ASYNC_IP/" | kubectl create -f -
