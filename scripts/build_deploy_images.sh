@@ -62,21 +62,3 @@ then
   echo "Pushing images error...exiting."
   exit $?
 fi
-
-source scripts/kubernetes_sync.sh
-
-source scripts/check_endpoint.sh server-sync
-
-export SERVER_SYNC_IP=$external_ip
-
-echo "Sync server external IP: $SERVER_SYNC_IP"
-
-source scripts/kubernetes_async.sh
-
-source scripts/check_endpoint.sh server-async
-
-export SERVER_ASYNC_IP=$external_ip
-
-echo "Reactive server external IP: $SERVER_ASYNC_IP"
-
-source scripts/kubernetes_jmeter.sh

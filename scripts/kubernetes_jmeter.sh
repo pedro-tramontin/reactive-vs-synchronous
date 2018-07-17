@@ -27,14 +27,44 @@ shift "$((OPTIND - 1))"
 echo "Getting auth for the jmeter cluster"
 gcloud container clusters get-credentials jmeter
 
+if [ $? -ne 0 ]
+then
+  echo "Error getting auth...exiting."
+  exit $?
+fi
+
 echo "Creating volume for synchronous server"
 gcloud compute disks create --size=1GB --zone=$zone jmeter-sync
 
-echo "Creating JMeter for the synchronous server"
-cat kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
+if [ $? -ne 0 ]
+then
+  echo "Error creating disk...exiting."
+  exit $?
+fi
 
 echo "Creating volume for reactive server"
 gcloud compute disks create --size=1GB --zone=$zone jmeter-async
 
+if [ $? -ne 0 ]
+then
+  echo "Error creating service...exiting."
+  exit $?
+fi
+
+echo "Creating JMeter for the synchronous server"
+cat kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
+
+if [ $? -ne 0 ]
+then
+  echo "Error creating service...exiting."
+  exit $?
+fi
+
 echo "Creating JMeter for the reactive server"
 cat kubernetes/jmeter/jmeter-async.yml | sed "s/%%SERVER_HOST%%/$SERVER_ASYNC_IP/" | kubectl create -f -
+
+if [ $? -ne 0 ]
+then
+  echo "Error creating service...exiting."
+  exit $?
+fi

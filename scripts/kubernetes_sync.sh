@@ -27,14 +27,50 @@ shift "$((OPTIND - 1))"
 echo "Getting auth for the sync cluster"
 gcloud container clusters get-credentials sync
 
+if [ $? -ne 0 ]
+then
+  echo "Error getting auth...exiting."
+  exit $?
+fi
+
 echo "Creating synchronous backend"
 kubectl create -f kubernetes/sync/deployment-backend.yml
+
+if [ $? -ne 0 ]
+then
+  echo "Error creating synchronous backend...exiting."
+  exit $?
+fi
 
 echo "Creating service for the synchronous backend"
 kubectl create -f kubernetes/sync/service-backend.yml
 
+if [ $? -ne 0 ]
+then
+  echo "Error creating service...exiting."
+  exit $?
+fi
+
 echo "Creating synchronous server"
 kubectl create -f kubernetes/sync/deployment-server.yml
 
+if [ $? -ne 0 ]
+then
+  echo "Error creating synchronous server...exiting."
+  exit $?
+fi
+
 echo "Creating service for the synchronous server"
 kubectl create -f kubernetes/sync/service-server.yml
+
+if [ $? -ne 0 ]
+then
+  echo "Error creating service...exiting."
+  exit $?
+fi
+
+source scripts/check_endpoint.sh
+
+get_service_external_ip server-sync SERVER_SYNC_IP
+
+echo "Sync server external IP: $SERVER_SYNC_IP"

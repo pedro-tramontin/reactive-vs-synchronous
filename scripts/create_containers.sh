@@ -25,10 +25,28 @@ echo "Creating the sync container"
 # Creates the cluster to run the synchronous backend
 gcloud container clusters create sync --num-nodes=2 --zone=$zone
 
+if [ $? -ne 0 ]
+then
+  echo "Sync cluster creation error...exiting."
+  exit $?
+fi
+
 echo "Creating the reactive container"
 # Creates the cluster to run the reactive backend
 gcloud container clusters create async --num-nodes=2 --zone=$zone
 
+if [ $? -ne 0 ]
+then
+  echo "Reactive cluster creation error...exiting."
+  exit $?
+fi
+
 echo "Creating the jmeter container"
 # Creates the cluster to run the JMeter load testing
 gcloud container clusters create jmeter --num-nodes=2 --zone=$zone
+
+if [ $? -ne 0 ]
+then
+  echo "JMeter cluster creation error...exiting."
+  exit $?
+fi
