@@ -24,8 +24,14 @@ while getopts ':hc:z:' option; do
 done
 shift "$((OPTIND - 1))"
 
+basedir=$(dirname -- "$0")
+
+echo "Loading env variables"
+source ${basedir}/config.sh
+source ${basedir}/utils.sh
+
 echo "Getting auth for the async cluster"
-gcloud container clusters get-credentials async
+gcloud container clusters get-credentials ${container_async}
 
 if [ $? -ne 0 ]
 then
@@ -34,7 +40,7 @@ then
 fi
 
 echo "Creating reactive backend"
-kubectl create -f kubernetes/async/deployment-backend.yml
+kubectl create -f ${basedir}/../kubernetes/async/deployment-backend.yml
 
 if [ $? -ne 0 ]
 then
@@ -43,7 +49,7 @@ then
 fi
 
 echo "Creating service for the reactive backend"
-kubectl create -f kubernetes/async/service-backend.yml
+kubectl create -f ${basedir}/../kubernetes/async/service-backend.yml
 
 if [ $? -ne 0 ]
 then
@@ -52,7 +58,7 @@ then
 fi
 
 echo "Creating reactive server"
-kubectl create -f kubernetes/async/deployment-server.yml
+kubectl create -f ${basedir}/../kubernetes/async/deployment-server.yml
 
 if [ $? -ne 0 ]
 then
@@ -61,15 +67,13 @@ then
 fi
 
 echo "Creating service for the reactive server"
-kubectl create -f kubernetes/async/service-server.yml
+kubectl create -f ${basedir}/../kubernetes/async/service-server.yml
 
 if [ $? -ne 0 ]
 then
   echo "Error creating service...exiting."
   exit $?
 fi
-
-source scripts/check_endpoint.sh
 
 get_service_external_ip server-async SERVER_ASYNC_IP
 

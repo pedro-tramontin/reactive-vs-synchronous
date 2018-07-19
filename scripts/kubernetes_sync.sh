@@ -1,4 +1,5 @@
 #!/bin/bash
+
 usage="$(basename "$0") [-c CLUSTER-NAME] [-z ZONE] [-h]
 
 Creates the deployments and services to run the synchronous server.
@@ -24,8 +25,14 @@ while getopts ':hc:z:' option; do
 done
 shift "$((OPTIND - 1))"
 
+basedir=$(dirname -- "$0")
+
+echo "Loading env variables"
+source ${basedir}/config.sh
+source ${basedir}/utils.sh
+
 echo "Getting auth for the sync cluster"
-gcloud container clusters get-credentials sync
+gcloud container clusters get-credentials ${container_sync}
 
 if [ $? -ne 0 ]
 then
@@ -34,7 +41,7 @@ then
 fi
 
 echo "Creating synchronous backend"
-kubectl create -f kubernetes/sync/deployment-backend.yml
+kubectl create -f ${basedir}/../kubernetes/sync/deployment-backend.yml
 
 if [ $? -ne 0 ]
 then
@@ -43,7 +50,7 @@ then
 fi
 
 echo "Creating service for the synchronous backend"
-kubectl create -f kubernetes/sync/service-backend.yml
+kubectl create -f ${basedir}/../kubernetes/sync/service-backend.yml
 
 if [ $? -ne 0 ]
 then
@@ -52,7 +59,7 @@ then
 fi
 
 echo "Creating synchronous server"
-kubectl create -f kubernetes/sync/deployment-server.yml
+kubectl create -f ${basedir}/../kubernetes/sync/deployment-server.yml
 
 if [ $? -ne 0 ]
 then
@@ -61,15 +68,13 @@ then
 fi
 
 echo "Creating service for the synchronous server"
-kubectl create -f kubernetes/sync/service-server.yml
+kubectl create -f ${basedir}/../kubernetes/sync/service-server.yml
 
 if [ $? -ne 0 ]
 then
   echo "Error creating service...exiting."
   exit $?
 fi
-
-source scripts/check_endpoint.sh
 
 get_service_external_ip server-sync SERVER_SYNC_IP
 

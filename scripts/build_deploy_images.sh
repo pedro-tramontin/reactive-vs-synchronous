@@ -1,19 +1,14 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-d DIR] [-h]
+usage="$(basename "$0") [-h]
 
 Builds, tags and push the docker images to Google Registry
 
 where:
-    -d  set the project root directory (default: .)
     -h  show this help text"
 
-dir=.
-
-while getopts ':hd:' option; do
+while getopts ':h' option; do
   case "$option" in
-    d) dir=$OPTARG
-       ;;
     h|*) echo "$usage"
        exit
        ;;
@@ -21,14 +16,13 @@ while getopts ':hd:' option; do
 done
 shift "$((OPTIND - 1))"
 
-echo "Setting working dir to $dir"
-cd $dir
+basedir=$(dirname -- "$0")
 
 echo "Loading env variables"
-source scripts/config.sh
+source ${basedir}/config.sh
 
 echo "Calling gradle to build images"
-./gradlew docker
+sh -c "cd ${basedir}/.. && ./gradlew docker"
 
 if [ $? -ne 0 ]
 then
@@ -36,14 +30,11 @@ then
   exit $?
 fi
 
-repo="$docker_repository"
-gcr="$docker_registry/$gc_project"
-
 echo "Tagging images"
-docker tag $repo/rvss-backend $gcr/rvss-backend:latest
-docker tag $repo/rvss-server-sync $gcr/rvss-server-sync:latest
-docker tag $repo/rvss-server-async $gcr/rvss-server-async:latest
-docker tag $repo/rvss-jmeter $gcr/rvss-jmeter:latest
+docker tag ${docker_repository}/${project_backend} ${tag_repo}/${project_backend}:${tag}
+docker tag ${docker_repository}/${project_sync} ${tag_repo}/${project_sync}:${tag}
+docker tag ${docker_repository}/${project_async} ${tag_repo}/${project_async}:${tag}
+docker tag ${docker_repository}/${project_jmeter} ${tag_repo}/${project_jmeter}:${tag}
 
 if [ $? -ne 0 ]
 then
@@ -52,10 +43,10 @@ then
 fi
 
 echo "Pushing images"
-docker push $gcr/rvss-backend:latest
-docker push $gcr/rvss-server-sync:latest
-docker push $gcr/rvss-server-async:latest
-docker push $gcr/rvss-jmeter:latest
+docker push ${tag_repo}/${project_backend}:${tag}
+docker push ${tag_repo}/${project_sync}:${tag}
+docker push ${tag_repo}/${project_async}:${tag}
+docker push ${tag_repo}/${project_jmeter}:${tag}
 
 if [ $? -ne 0 ]
 then

@@ -24,8 +24,14 @@ while getopts ':hc:z:' option; do
 done
 shift "$((OPTIND - 1))"
 
+basedir=$(dirname -- "$0")
+
+echo "Loading env variables"
+source ${basedir}/config.sh
+source ${basedir}/utils.sh
+
 echo "Getting auth for the jmeter cluster"
-gcloud container clusters get-credentials jmeter
+gcloud container clusters get-credentials ${container_jmeter}
 
 if [ $? -ne 0 ]
 then
@@ -52,7 +58,7 @@ then
 fi
 
 echo "Creating JMeter for the synchronous server"
-cat kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
+cat ${basedir}/../kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
 
 if [ $? -ne 0 ]
 then
@@ -61,7 +67,7 @@ then
 fi
 
 echo "Creating JMeter for the reactive server"
-cat kubernetes/jmeter/jmeter-async.yml | sed "s/%%SERVER_HOST%%/$SERVER_ASYNC_IP/" | kubectl create -f -
+cat ${basedir}/../kubernetes/jmeter/jmeter-async.yml | sed "s/%%SERVER_HOST%%/$SERVER_ASYNC_IP/" | kubectl create -f -
 
 if [ $? -ne 0 ]
 then

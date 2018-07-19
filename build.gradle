@@ -10,6 +10,10 @@ buildscript {
     }
 }
 
+ext {
+    dockerRepo = System.getenv('DOCKER_REPO')
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'

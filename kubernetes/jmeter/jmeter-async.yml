@@ -16,11 +16,11 @@ spec:
           - name: SERVER_HOST
             value: %%SERVER_HOST%%
           - name: NUM_THREADS
-            value: "4000"
+            value: "400"
           - name: RAMPUP_PERIOD
-            value: "360"
+            value: "5"
           - name: LOOP_COUNT
-            value: "50"
+            value: "1"
           - name: OUT_DIR
             value: "out/async/report"
           - name: OUT_RESULTS

@@ -3,7 +3,7 @@
 gcloud container clusters get-credentials jmeter
 kubectl delete job/sync-jmeter job/async-jmeter
 
-source scripts/check_endpoint.sh
+source scripts/utils
 
 gcloud container clusters get-credentials sync
 get_service_external_ip server-sync SERVER_SYNC_IP

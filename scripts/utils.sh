@@ -12,3 +12,15 @@ function get_service_external_ip() {
 
   eval "$2=$external_ip"
 }
+
+# Pass the pod name from the jmeter job you want to wait to finish
+# Ex.: pod/jmeter-sync-123iu9
+# Will run forever...
+function wait_job_finish() {
+  last_line=""
+  while [ "$last_line" != "... end of run" ]; do
+    echo "Waiting for job $1 to finish..."
+    last_line=$(kubectl logs $1 | tail -n 1)
+    [ "$last_line" != "... end of run" ] && sleep 10
+  done
+}

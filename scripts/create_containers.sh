@@ -21,9 +21,14 @@ while getopts ':hz:' option; do
 done
 shift "$((OPTIND - 1))"
 
+basedir=$(dirname -- "$0")
+
+echo "Loading env variables"
+source ${basedir}/config.sh
+
 echo "Creating the sync container"
 # Creates the cluster to run the synchronous backend
-gcloud container clusters create sync --num-nodes=2 --zone=$zone
+gcloud container clusters create ${container_sync} --num-nodes=2 --zone=$zone
 
 if [ $? -ne 0 ]
 then
@@ -33,7 +38,7 @@ fi
 
 echo "Creating the reactive container"
 # Creates the cluster to run the reactive backend
-gcloud container clusters create async --num-nodes=2 --zone=$zone
+gcloud container clusters create ${container_async} --num-nodes=2 --zone=$zone
 
 if [ $? -ne 0 ]
 then
@@ -43,7 +48,7 @@ fi
 
 echo "Creating the jmeter container"
 # Creates the cluster to run the JMeter load testing
-gcloud container clusters create jmeter --num-nodes=2 --zone=$zone
+gcloud container clusters create ${container_jmeter} --num-nodes=2 --zone=$zone
 
 if [ $? -ne 0 ]
 then
