@@ -2,11 +2,9 @@
 
 basedir=$(dirname -- "$0")
 
-echo "Loading env variables"
 source ${basedir}/config.sh
 
-
-#source ${basedir}/build_deploy_images.sh
+source ${basedir}/build_deploy_images.sh
 
 if [ $? -ne 0 ]
 then
@@ -14,7 +12,7 @@ then
   exit $?
 fi
 
-#source ${basedir}/create_containers.sh -z ${zone}
+source ${basedir}/create_containers.sh -z ${zone}
 
 if [ $? -ne 0 ]
 then
@@ -22,7 +20,7 @@ then
   exit $?
 fi
 
-#source ${basedir}/kubernetes_sync.sh -z ${zone}
+source ${basedir}/kubernetes_sync.sh -z ${zone}
 
 if [ $? -ne 0 ]
 then
@@ -30,7 +28,7 @@ then
   exit $?
 fi
 
-#source ${basedir}/kubernetes_async.sh -z ${zone}
+source ${basedir}/kubernetes_async.sh -z ${zone}
 
 if [ $? -ne 0 ]
 then
@@ -45,12 +43,9 @@ do
   sleep 10s
 done
 
-#source ${basedir}/kubernetes_jmeter.sh -z ${zone}
-
-echo "Now waiting for jobs to finish"
-kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | while read line; do wait_job_finish "pod/$line"; done
+source ${basedir}/kubernetes_jmeter.sh -z ${zone}
 
 echo "Downloading report files"
-source ${basedir}/get_jmeter_reports.sh -z ${zone}
+#source ${basedir}/get_jmeter_reports.sh -z ${zone}
 
 echo "Finished"

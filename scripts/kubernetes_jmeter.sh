@@ -39,24 +39,6 @@ then
   exit $?
 fi
 
-echo "Creating volume for synchronous server"
-gcloud compute disks create --size=1GB --zone=$zone jmeter-sync
-
-if [ $? -ne 0 ]
-then
-  echo "Error creating disk...exiting."
-  exit $?
-fi
-
-echo "Creating volume for reactive server"
-gcloud compute disks create --size=1GB --zone=$zone jmeter-async
-
-if [ $? -ne 0 ]
-then
-  echo "Error creating service...exiting."
-  exit $?
-fi
-
 echo "Creating JMeter for the synchronous server"
 cat ${basedir}/../kubernetes/jmeter/jmeter-sync.yml | sed "s/%%SERVER_HOST%%/$SERVER_SYNC_IP/" | kubectl create -f -
 
@@ -66,6 +48,9 @@ then
   exit $?
 fi
 
+echo "Now waiting for jobs to finish"
+kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | while read line; do wait_job_finish "pod/$line"; done
+
 echo "Creating JMeter for the reactive server"
 cat ${basedir}/../kubernetes/jmeter/jmeter-async.yml | sed "s/%%SERVER_HOST%%/$SERVER_ASYNC_IP/" | kubectl create -f -
 
@@ -74,3 +59,6 @@ then
   echo "Error creating service...exiting."
   exit $?
 fi
+
+echo "Now waiting for jobs to finish"
+kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | while read line; do wait_job_finish "pod/$line"; done

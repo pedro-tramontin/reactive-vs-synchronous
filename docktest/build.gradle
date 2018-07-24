@@ -1,9 +1,0 @@
-apply plugin: 'com.palantir.docker'
-
-docker {
-    dependsOn build
-    name 'docktest'
-    tags 'latest'
-    dockerfile file('Dockerfile')
-    files 'entrypoint.sh'
-}

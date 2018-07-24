@@ -5,5 +5,5 @@ docker {
     name 'pedront/rvss-jmeter'
     tags 'latest'
     dockerfile file('Dockerfile')
-    files 'apache-jmeter-4.0.tgz', 'test.jmx', 'docker-entrypoint.sh'
+    files 'apache-jmeter-4.0.tgz', 'test.jmx', 'docker-entrypoint.sh', 'upload.py'
 }

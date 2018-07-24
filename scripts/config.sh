@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Google Cloud project name
-gc_project="reactive-test"
+gc_project="async-test"
 
 # Default zone
 zone="us-central1-a"
