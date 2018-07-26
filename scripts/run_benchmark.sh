@@ -4,6 +4,9 @@ basedir=$(dirname -- "$0")
 
 source ${basedir}/config.sh
 
+# Enable Container Registry
+# gcloud services enable containerregistry.googleapis.com
+
 source ${basedir}/build_deploy_images.sh
 
 if [ $? -ne 0 ]
