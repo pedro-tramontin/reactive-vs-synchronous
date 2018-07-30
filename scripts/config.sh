@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Google Cloud project name
-gc_project="async-test"
+gc_project="pedront-test-project"
 
 # Default zone
 zone="us-central1-a"

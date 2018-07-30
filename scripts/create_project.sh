@@ -1,5 +1,10 @@
 #!/bin/bash
 
+basedir=$(dirname -- "$0")
+
+source ${basedir}/utils.sh
+
+
 usage="$(basename "$0") PROJECT_ID [-q] [-h]
 
 Creates a project in Google Cloud
@@ -30,13 +35,57 @@ then
   exit
 fi
 
-PROJECT_ID=$1
+project_id=$1
 
-temp=$(gcloud projects list --format="get(name)" --filter="name:${PROJECT_ID}")
+filter_result=$(gcloud projects list --format="get(projectId)" --filter="name:${project_id}")
 
-if [ -z "$out" ]
+if [ -n "${filter_result}" ]
 then
-    echo "Project ${PROJECT_ID} doesn't exist"
+  echo "Project ${project_id} already exists."
 else
-    echo ${PROJECT_ID}
+  gcloud projects create ${project_id}
+
+  message_if_error "Project creation error...exiting"
+fi
+
+echo "Setting project ${project_id} as default"
+
+gcloud config set core/project ${project_id}
+
+message_if_error "Error setting project ${project_id} as default...exiting"
+
+billing_enabled=$(gcloud beta billing projects describe pedront-test-project --format="get(billingEnabled)")
+if [ -z "${billing_enabled}" ]
+then
+  echo "Enabling billing for project ${project_id}."
+
+  billing_account=$(gcloud beta billing accounts list --format="get(name)" --limit=1)
+
+  message_if_error "Error getting billing account...exiting"
+
+  if [ -z "${billing_account}" ]
+  then
+    echo "No billing account found."
+    exit 0
+  fi
+
+  echo "Using billing account: ${billing_account}"
+
+  gcloud beta billing projects link ${project_id} --billing-account ${billing_account}
+
+  message_if_error "Error setting billing account...exiting"
+else
+  echo "Billing already enabled for project ${project_id}"
+fi
+
+has_container_registry=$(gcloud services list --format="get(serviceConfig.name)" --filter="serviceConfig.name:containerregistry.googleapis.com")
+if [ -z "${has_container_registry}" ]
+then
+  echo "Enabling container registry service"
+
+  gcloud services enable containerregistry.googleapis.com
+
+  message_if_error "Error enabling container registry...exiting"
+else
+  echo "Container Registry already enabled"
 fi

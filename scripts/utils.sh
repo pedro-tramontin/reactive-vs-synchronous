@@ -24,3 +24,12 @@ function wait_job_finish() {
     [ "$last_line" != "... end of run" ] && sleep 10
   done
 }
+
+# Pass the message that is to be logged case $? is different than zero
+function message_if_error() {
+  if [ $? -ne 0 ]
+  then
+    echo "$1"
+    exit $?
+  fi
+}
