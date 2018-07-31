@@ -26,34 +26,43 @@ basedir=$(dirname -- "$0")
 echo "Loading env variables"
 source ${basedir}/config.sh
 
-echo "Creating the sync container"
-# Creates the cluster to run the synchronous backend
-gcloud container clusters create ${container_sync} --num-nodes=2 --zone=${zone}
 
-if [ $? -ne 0 ]
+has_sync_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_sync}")
+if [ -z "${has_sync_container}" ]
 then
-  echo "Sync cluster creation error...exiting."
-  exit $?
+  echo "Creating the sync container"
+  gcloud container clusters create ${container_sync} --num-nodes=2 --zone=${zone}
+  
+  message_if_error "Sync cluster creation error...exiting."
+else
+  echo "Sync conainer already exists"
 fi
 
-echo "Creating the reactive container"
-# Creates the cluster to run the reactive backend
-gcloud container clusters create ${container_async} --num-nodes=2 --zone=${zone}
 
-if [ $? -ne 0 ]
+has_async_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_async}")
+if [ -z "${has_async_container}" ]
 then
-  echo "Reactive cluster creation error...exiting."
-  exit $?
+  echo "Creating the reactive container"
+  gcloud container clusters create ${container_async} --num-nodes=2 --zone=${zone}
+
+  message_if_error "Reactive cluster creation error...exiting."
+else
+  echo "Reactive container already exists"
 fi
 
-echo "Creating service account for JMeter"
-gcloud iam service-accounts create jmeter-service-account
 
-if [ $? -ne 0 ]
+has_jmeter_service_account=$(gcloud iam service-accounts list --format="get(email)" \
+--filter="email:${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com")
+if [ -z "${has_jmeter_service_account}" ]
 then
-  echo "Service account creation error...exiting."
-  exit $?
+  echo "Creating service account for JMeter"
+  gcloud iam service-accounts create ${jmeter_service_account}
+
+  message_if_error "Service account creation error...exiting."
+else
+  echo "Service account already exists."
 fi
+
 
 gcloud projects add-iam-policy-binding ${gc-project} \
   --member serviceAccount:jmeter-service-account@${gc-project}.iam.gserviceaccount.com \
@@ -65,16 +74,18 @@ then
   exit $?
 fi
 
-echo "Creating the jmeter container"
-# Creates the cluster to run the JMeter load testing
-gcloud container clusters create ${container_jmeter} --num-nodes=1 --zone=${zone} \
-  --service-account jmeter-service-account@${gc-project}.iam.gserviceaccount.com
 
-if [ $? -ne 0 ]
+has_jmeter_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_jmeter}")
+if [ -z "${has_jmeter_container}" ]
 then
-  echo "JMeter cluster creation error...exiting."
-  exit $?
+  echo "Creating the jmeter container"
+  gcloud container clusters create ${container_jmeter} --num-nodes=2 --zone=${zone}
+
+  message_if_error "JMeter cluster creation error...exiting."
+else
+  echo "JMeter conainer already exists"
 fi
+
 
 gsutil mb gs://jmeter-bucket-${gc-project}
 

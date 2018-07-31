@@ -27,3 +27,5 @@ tag="latest"
 container_sync="sync"
 container_async="async"
 container_jmeter="jmeter"
+
+jmeter_service_account="jmeter-service-account"

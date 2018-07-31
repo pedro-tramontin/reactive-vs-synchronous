@@ -37,6 +37,7 @@ fi
 
 project_id=$1
 
+
 filter_result=$(gcloud projects list --format="get(projectId)" --filter="name:${project_id}")
 
 if [ -n "${filter_result}" ]
@@ -48,11 +49,13 @@ else
   message_if_error "Project creation error...exiting"
 fi
 
+
 echo "Setting project ${project_id} as default"
 
 gcloud config set core/project ${project_id}
 
 message_if_error "Error setting project ${project_id} as default...exiting"
+
 
 billing_enabled=$(gcloud beta billing projects describe pedront-test-project --format="get(billingEnabled)")
 if [ -z "${billing_enabled}" ]
@@ -78,7 +81,9 @@ else
   echo "Billing already enabled for project ${project_id}"
 fi
 
-has_container_registry=$(gcloud services list --format="get(serviceConfig.name)" --filter="serviceConfig.name:containerregistry.googleapis.com")
+
+has_container_registry=$(gcloud services list --format="get(serviceConfig.name)" \
+  --filter="serviceConfig.name:containerregistry.googleapis.com")
 if [ -z "${has_container_registry}" ]
 then
   echo "Enabling container registry service"
@@ -88,4 +93,18 @@ then
   message_if_error "Error enabling container registry...exiting"
 else
   echo "Container Registry already enabled"
+fi
+
+
+has_container_service=$(gcloud services list --format="get(serviceConfig.name)" \
+  --filter="serviceConfig.name:container.googleapis.com")
+if [ -z "${has_container_service}" ]
+then
+  echo "Enabling container service"
+
+  gcloud services enable container.googleapis.com
+
+  message_if_error "Error enabling container service...exiting"
+else
+  echo "Container Service already enabled"
 fi
