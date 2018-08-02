@@ -10,7 +10,7 @@ spec:
       name: sync-jmeter
     spec:
       containers:
-        - image: gcr.io/async-test/rvss-jmeter:latest
+        - image: gcr.io/%%GC_PROJECT%%/rvss-jmeter:latest
           name: sync-jmeter
           env:
           - name: SERVER_HOST
@@ -24,7 +24,7 @@ spec:
           - name: PROJECT
             value: "async-test"
           - name: BUCKET_NAME
-            value: "jmeter-bucket-async-test"
+            value: "%%BUCKET_NAME%%"
           - name: REPORT_NAME
             value: "sync"
       restartPolicy: Never

@@ -4,40 +4,31 @@ basedir=$(dirname -- "$0")
 
 source ${basedir}/config.sh
 
-# Enable Container Registry
-# gcloud services enable containerregistry.googleapis.com
 
 source ${basedir}/build_deploy_images.sh
 
-if [ $? -ne 0 ]
-then
-  echo "Error building and deploying images...exiting."
-  exit $?
-fi
+message_if_error "Error building and deploying images...exiting."
+
 
 source ${basedir}/create_containers.sh -z ${zone}
 
-if [ $? -ne 0 ]
-then
-  echo "Error creating cluster...exiting."
-  exit $?
-fi
+message_if_error "Error creating cluster...exiting."
+
+
+source ${basedir}/create_bucket.sh
+
+message_if_error "Error creating bucket...exiting."
+
 
 source ${basedir}/kubernetes_sync.sh -z ${zone}
 
-if [ $? -ne 0 ]
-then
-  echo "Error creating synchronous servers...exiting."
-  exit $?
-fi
+message_if_error  "Error creating synchronous servers...exiting."
+
 
 source ${basedir}/kubernetes_async.sh -z ${zone}
 
-if [ $? -ne 0 ]
-then
-  echo "Error creating reactive servers...exiting."
-  exit $?
-fi
+message_if_error  "Error creating reactive servers...exiting."
+
 
 echo "Waiting 60s for instances to settle"
 for i in {60..10..10}

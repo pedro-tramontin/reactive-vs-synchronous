@@ -1,5 +1,10 @@
 #!/bin/bash
 
+basedir=$(dirname -- "$0")
+
+source ${basedir}/utils.sh
+
+
 usage="$(basename "$0") [-c CLUSTER-NAME] [-z ZONE] [-h]
 
 Creates the deployments and services to run the synchronous server.
@@ -25,57 +30,87 @@ while getopts ':hc:z:' option; do
 done
 shift "$((OPTIND - 1))"
 
-basedir=$(dirname -- "$0")
 
 echo "Loading env variables"
 source ${basedir}/config.sh
-source ${basedir}/utils.sh
+
+
+has_sync_container=$(gcloud container clusters list --zone=${zone} --format="get(name)" \
+  --filter="name=${container_sync}")
+if [ -z "${has_sync_container}" ]
+then
+  echo "Sync container doesn't exists...exiting."
+
+  exit 1
+fi
+
 
 echo "Getting auth for the sync cluster"
-gcloud container clusters get-credentials ${container_sync}
+gcloud container clusters get-credentials ${container_sync} --zone=${zone}
 
-if [ $? -ne 0 ]
+message_if_error "Error getting auth...exiting."
+
+
+has_dep_back_sync=$(kubectl get deployments --field-selector='metadata.name=backend-sync' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_back_sync}" ]
 then
-  echo "Error getting auth...exiting."
-  exit $?
+  echo "Creating synchronous backend deployment"
+  cat ${basedir}/../kubernetes/sync/deployment-backend.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating synchronous backend...exiting."
+else
+  echo "Synchronous backend deployment already exists."
 fi
 
-echo "Creating synchronous backend"
-kubectl create -f ${basedir}/../kubernetes/sync/deployment-backend.yml
 
-if [ $? -ne 0 ]
+has_dep_svc_back_sync=$(kubectl get services --field-selector='metadata.name=backend-sync' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_svc_back_sync}" ]
 then
-  echo "Error creating synchronous backend...exiting."
-  exit $?
+  echo "Creating service for synchronous backend"
+  cat ${basedir}/../kubernetes/sync/service-backend.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating service...exiting."
+else
+  echo "Service for synchronous backend already exists"
 fi
 
-echo "Creating service for the synchronous backend"
-kubectl create -f ${basedir}/../kubernetes/sync/service-backend.yml
 
-if [ $? -ne 0 ]
+has_dep_server_sync=$(kubectl get deployments --field-selector='metadata.name=server-sync' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_server_sync}" ]
 then
-  echo "Error creating service...exiting."
-  exit $?
+  echo "Creating synchronous server deployment"
+  cat ${basedir}/../kubernetes/sync/deployment-server.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating synchronous server...exiting."
+else
+  echo "Synchronous server deployment already exists."
 fi
 
-echo "Creating synchronous server"
-kubectl create -f ${basedir}/../kubernetes/sync/deployment-server.yml
 
-if [ $? -ne 0 ]
+has_dep_svc_server_sync=$(kubectl get services --field-selector='metadata.name=server-sync' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_svc_server_sync}" ]
 then
-  echo "Error creating synchronous server...exiting."
-  exit $?
+  echo "Creating service for the synchronous server"
+  cat ${basedir}/../kubernetes/sync/service-server.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating service...exiting."
+else
+  echo "Service for the synchronous server already exists."
 fi
 
-echo "Creating service for the synchronous server"
-kubectl create -f ${basedir}/../kubernetes/sync/service-server.yml
-
-if [ $? -ne 0 ]
-then
-  echo "Error creating service...exiting."
-  exit $?
-fi
 
 get_service_external_ip server-sync SERVER_SYNC_IP
 
-echo "Sync server external IP: $SERVER_SYNC_IP"
+echo "Sync server external IP: ${SERVER_SYNC_IP}"

@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: backend-sync
-        image: gcr.io/async-test/rvss-backend:latest
+        image: gcr.io/%%GC_PROJECT%%/rvss-backend:latest
         ports:
         - containerPort: 8080

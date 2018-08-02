@@ -1,5 +1,10 @@
 #!/bin/bash
 
+basedir=$(dirname -- "$0")
+
+source ${basedir}/utils.sh
+
+
 usage="$(basename "$0") [-z ZONE] [-h]
 
 Creates all the containers in Google Cloud to run the project
@@ -21,13 +26,12 @@ while getopts ':hz:' option; do
 done
 shift "$((OPTIND - 1))"
 
-basedir=$(dirname -- "$0")
-
 echo "Loading env variables"
 source ${basedir}/config.sh
 
 
-has_sync_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_sync}")
+has_sync_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_sync}")
 if [ -z "${has_sync_container}" ]
 then
   echo "Creating the sync container"
@@ -35,11 +39,12 @@ then
   
   message_if_error "Sync cluster creation error...exiting."
 else
-  echo "Sync conainer already exists"
+  echo "Sync container already exists"
 fi
 
 
-has_async_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_async}")
+has_async_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_async}")
 if [ -z "${has_async_container}" ]
 then
   echo "Creating the reactive container"
@@ -64,22 +69,30 @@ else
 fi
 
 
-gcloud projects add-iam-policy-binding ${gc-project} \
-  --member serviceAccount:jmeter-service-account@${gc-project}.iam.gserviceaccount.com \
-  --role roles/storage.admin
-
-if [ $? -ne 0 ]
+is_service_account_binded=$(gcloud projects get-iam-policy ${gc_project} \
+  --flatten="bindings[].members[]" --format="get(bindings.members)" \
+  --filter="bindings.members:serviceAccount:${jmeter_service_account}* AND \
+            bindings.role:roles/storage.admin")
+if [ -z "${is_service_account_binded}" ]
 then
-  echo "Error assigning role to service account...exiting."
-  exit $?
+  echo "Assigning role to service account"
+  gcloud projects add-iam-policy-binding ${gc_project} \
+    --member serviceAccount:${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com \
+    --role roles/storage.admin
+
+  message_if_error "Error assigning role to service account...exiting."
+else
+  echo "Role already assigned to service account."
 fi
 
 
-has_jmeter_container=$(gcloud container clusters list --format="get(name)" --filter="name:${container_jmeter}")
+has_jmeter_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_jmeter}")
 if [ -z "${has_jmeter_container}" ]
 then
   echo "Creating the jmeter container"
-  gcloud container clusters create ${container_jmeter} --num-nodes=2 --zone=${zone}
+  gcloud container clusters create ${container_jmeter} --num-nodes=1 --zone=${zone} \
+    --service-account ${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com
 
   message_if_error "JMeter cluster creation error...exiting."
 else
@@ -87,10 +100,10 @@ else
 fi
 
 
-gsutil mb gs://jmeter-bucket-${gc-project}
+#gsutil mb gs://jmeter-bucket-${gc_project}
 
-if [ $? -ne 0 ]
-then
-  echo "JMeter bucket creation error...exiting."
-  exit $?
-fi
+#if [ $? -ne 0 ]
+#then
+#  echo "JMeter bucket creation error...exiting."
+#  exit $?
+#fi

@@ -1,4 +1,10 @@
 #!/bin/bash
+
+basedir=$(dirname -- "$0")
+
+source ${basedir}/utils.sh
+
+
 usage="$(basename "$0") [-c CLUSTER-NAME] [-z ZONE] [-h]
 
 Creates the deployments and services to run the reactive server.
@@ -24,57 +30,87 @@ while getopts ':hc:z:' option; do
 done
 shift "$((OPTIND - 1))"
 
-basedir=$(dirname -- "$0")
 
 echo "Loading env variables"
 source ${basedir}/config.sh
-source ${basedir}/utils.sh
 
-echo "Getting auth for the async cluster"
-gcloud container clusters get-credentials ${container_async}
 
-if [ $? -ne 0 ]
+has_async_container=$(gcloud container clusters list --zone=${zone} --format="get(name)" \
+  --filter="name=${container_async}")
+if [ -z "${has_async_container}" ]
 then
-  echo "Error getting auth...exiting."
-  exit $?
+  echo "Reactive container doesn't exists...exiting."
+
+  exit 1
 fi
 
-echo "Creating reactive backend"
-kubectl create -f ${basedir}/../kubernetes/async/deployment-backend.yml
 
-if [ $? -ne 0 ]
+echo "Getting auth for the reactive cluster"
+gcloud container clusters get-credentials ${container_async} --zone=${zone}
+
+message_if_error "Error getting auth...exiting."
+
+
+has_dep_back_async=$(kubectl get deployments --field-selector='metadata.name=backend-async' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_back_async}" ]
 then
-  echo "Error creating reactive backend...exiting."
-  exit $?
+  echo "Creating reactive backend deployment"
+  cat ${basedir}/../kubernetes/async/deployment-backend.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating reactive backend...exiting."
+else
+  echo "Reactive backend deployment already exists."
 fi
 
-echo "Creating service for the reactive backend"
-kubectl create -f ${basedir}/../kubernetes/async/service-backend.yml
 
-if [ $? -ne 0 ]
+has_dep_svc_back_async=$(kubectl get services --field-selector='metadata.name=backend-async' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_svc_back_async}" ]
 then
-  echo "Error creating service...exiting."
-  exit $?
+  echo "Creating service for reactive backend"
+  cat ${basedir}/../kubernetes/async/service-backend.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating service...exiting."
+else
+  echo "Service for reactive backend already exists"
 fi
 
-echo "Creating reactive server"
-kubectl create -f ${basedir}/../kubernetes/async/deployment-server.yml
 
-if [ $? -ne 0 ]
+has_dep_server_async=$(kubectl get deployments --field-selector='metadata.name=server-async' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_server_async}" ]
 then
-  echo "Error creating reactive server...exiting."
-  exit $?
+  echo "Creating reactive server deployment"
+  cat ${basedir}/../kubernetes/async/deployment-server.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating reactive server...exiting."
+else
+  echo "Reactive server deployment already exists."
 fi
 
-echo "Creating service for the reactive server"
-kubectl create -f ${basedir}/../kubernetes/async/service-server.yml
 
-if [ $? -ne 0 ]
+has_dep_svc_server_async=$(kubectl get services --field-selector='metadata.name=server-async' \
+  -o jsonpath='{.items[*].metadata.name}')
+if [ -z "${has_dep_svc_server_async}" ]
 then
-  echo "Error creating service...exiting."
-  exit $?
+  echo "Creating service for the reactive server"
+  cat ${basedir}/../kubernetes/async/service-server.yml | \
+    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    kubectl create -f -
+
+  message_if_error  "Error creating service...exiting."
+else
+  echo "Service for the reactive server already exists."
 fi
+
 
 get_service_external_ip server-async SERVER_ASYNC_IP
 
-echo "Reactive server external IP: $SERVER_ASYNC_IP"
+echo "Reactive server external IP: ${SERVER_ASYNC_IP}"
