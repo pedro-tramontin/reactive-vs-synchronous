@@ -16,17 +16,15 @@ spec:
           - name: SERVER_HOST
             value: %%SERVER_HOST%%
           - name: NUM_THREADS
-            value: "4000"
+            value: "40"
           - name: RAMPUP_PERIOD
-            value: "360"
+            value: "10"
           - name: LOOP_COUNT
-            value: "50"
+            value: "1"
           - name: PROJECT
-            value: "async-test"
+            value: "%%GC_PROJECT%%"
           - name: BUCKET_NAME
             value: "%%BUCKET_NAME%%"
-          - name: OUTPUT_DIR
+          - name: REPORT_NAME
             value: "async"
-          - name: FILENAME
-            value: "async.tar.gz"
       restartPolicy: Never

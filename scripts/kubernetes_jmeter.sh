@@ -70,7 +70,11 @@ fi
 
 echo "Now waiting for jobs to finish"
 kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
-  while read line; do wait_job_finish "pod/$line"; done
+  while read line;
+    do wait_job_finish "pod/$line";
+
+    message_if_error "The Job concluded with error...exiting."
+  done
 
 
 has_dep_jmeter_async=$(kubectl get jobs --field-selector='metadata.name=async-jmeter' \
@@ -91,4 +95,9 @@ fi
 
 
 echo "Now waiting for jobs to finish"
-kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | while read line; do wait_job_finish "pod/$line"; done
+kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
+  while read line;
+    do wait_job_finish "pod/$line";
+
+    message_if_error "The Job concluded with error...exiting."
+  done
