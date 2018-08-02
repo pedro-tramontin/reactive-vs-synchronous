@@ -21,8 +21,10 @@ while getopts ':h' option; do
 done
 shift "$((OPTIND - 1))"
 
+
 echo "Loading env variables"
 source ${basedir}/config.sh
+
 
 has_bucket=false
 

@@ -37,9 +37,16 @@ do
   sleep 10s
 done
 
+
 source ${basedir}/kubernetes_jmeter.sh -z ${zone}
 
+message_if_error  "Error running JMeter...exiting."
+
+
 echo "Downloading report files"
-#source ${basedir}/get_jmeter_reports.sh -z ${zone}
+source ${basedir}/download_jmeter_reports.sh -z ${zone}
+
+message_if_error  "Error donwloading reports...exiting."
+
 
 echo "Finished"

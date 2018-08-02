@@ -16,11 +16,11 @@ spec:
           - name: SERVER_HOST
             value: %%SERVER_HOST%%
           - name: NUM_THREADS
-            value: "40"
+            value: "4000"
           - name: RAMPUP_PERIOD
-            value: "10"
+            value: "360"
           - name: LOOP_COUNT
-            value: "1"
+            value: "50"
           - name: PROJECT
             value: "%%GC_PROJECT%%"
           - name: BUCKET_NAME
