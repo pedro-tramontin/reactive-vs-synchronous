@@ -32,7 +32,7 @@ shift "$((OPTIND - 1))"
 
 
 echo "Loading env variables"
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 gsutil cp gs://jmeter-bucket-${gc_project}/sync.tar.gz ${output_dir}

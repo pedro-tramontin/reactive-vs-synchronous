@@ -26,8 +26,9 @@ while getopts ':hz:' option; do
 done
 shift "$((OPTIND - 1))"
 
+
 echo "Loading env variables"
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 has_sync_container=$(gcloud container clusters list --format="get(name)" \

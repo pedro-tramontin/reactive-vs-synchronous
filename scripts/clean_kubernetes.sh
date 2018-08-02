@@ -28,7 +28,7 @@ shift "$((OPTIND - 1))"
 
 
 echo "Loading env variables"
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 echo "Deleting clusters..."

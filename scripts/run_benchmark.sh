@@ -2,7 +2,7 @@
 
 basedir=$(dirname -- "$0")
 
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 source ${basedir}/create_project.sh ${gc_project}

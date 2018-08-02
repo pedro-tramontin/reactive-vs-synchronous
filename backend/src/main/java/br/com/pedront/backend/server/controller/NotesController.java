@@ -21,7 +21,7 @@ public class NotesController {
     public NoteVO create(@RequestBody final NoteVO note) {
 
         try {
-            Thread.sleep(200);
+            Thread.sleep(500);
 
             note.setId(UUID.randomUUID().toString());
         } catch (InterruptedException e) {

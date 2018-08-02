@@ -23,8 +23,9 @@ shift "$((OPTIND - 1))"
 
 basedir=$(dirname -- "$0")
 
+
 echo "Loading env variables"
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 echo "Calling gradle to build images"

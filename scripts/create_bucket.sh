@@ -23,7 +23,7 @@ shift "$((OPTIND - 1))"
 
 
 echo "Loading env variables"
-source ${basedir}/config.sh
+source ${basedir}/config.properties
 
 
 has_bucket=false
