@@ -1,21 +1,21 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: backend-sync
+  name: %%APP_BACKEND%%
   labels:
-    app: backend-sync
+    app: %%APP_BACKEND%%
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend-sync
+      app: %%APP_BACKEND%%
   template:
     metadata:
       labels:
-        app: backend-sync
+        app: %%APP_BACKEND%%
     spec:
       containers:
-      - name: backend-sync
-        image: gcr.io/%%GC_PROJECT%%/rvss-backend:latest
+      - name: %%APP_BACKEND%%
+        image: %%IMAGE_PREFIX%%/%%IMAGE_NAME%%:%%IMAGE_TAG%%
         ports:
         - containerPort: 8080

@@ -1,38 +1,124 @@
 #!/bin/bash
 
-echo "Getting auth for the sync cluster"
-gcloud container clusters get-credentials sync
+basedir=$(dirname -- "$0")
 
-kubectl delete deployment/backend-sync
-kubectl delete deployment/server-sync
-kubectl delete service/backend-sync
-kubectl delete service/server-sync
+source ${basedir}/utils.sh
 
-echo "Getting auth for the async cluster"
-gcloud container clusters get-credentials async
 
-kubectl delete deployment/backend-async
-kubectl delete deployment/server-async
-kubectl delete service/backend-async
-kubectl delete service/server-async
+usage="$(basename "$0") [-z ZONE] [-h]
 
-echo "Getting auth for the jmeter cluster"
-gcloud container clusters get-credentials jmeter
+Deletes all the resources that where created to run the benchmark.
 
-kubectl delete job/sync-jmeter
-kubectl delete job/async-jmeter
+where:
+    -z  set the ZONE (default: us-central1-a)
+    -h  show this help text"
 
-echo "Deleting JMeter disks"
-gcloud compute disks delete --quiet jmeter-sync-volume
-gcloud compute disks delete --quiet jmeter-async-volume
+zone=us-central1-a
 
-echo "Deleting images"
-gcloud container images delete gcr.io/reactive-test/rvss-backend --force-delete-tags --quiet
-gcloud container images delete gcr.io/reactive-test/rvss-jmeter --force-delete-tags --quiet
-gcloud container images delete gcr.io/reactive-test/rvss-server-async --force-delete-tags --quiet
-gcloud container images delete gcr.io/reactive-test/rvss-server-sync --force-delete-tags --quiet
+while getopts ':hz:' option; do
+  case "$option" in
+    z) zone=$OPTARG
+       ;;
+    h|*) echo "$usage"
+       exit
+       ;;
+  esac
+done
+shift "$((OPTIND - 1))"
 
-echo "Deleting containers"
-gcloud container clusters delete jmeter --quiet
-gcloud container clusters delete sync --quiet
-gcloud container clusters delete async --quiet
+
+echo "Loading env variables"
+source ${basedir}/config.sh
+
+
+echo "Deleting clusters..."
+
+
+has_sync_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_sync}")
+if [ -n "${has_sync_container}" ]
+then
+  echo "Sync container..."
+  gcloud container clusters delete ${container_sync} --zone=${zone} --quiet
+
+  message_if_error "Error deleting sync cluster...exiting."
+else
+  echo "Sync container doesn't exist"
+fi
+
+
+has_async_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_async}")
+if [ -n "${has_async_container}" ]
+then
+  echo "Reactive container..."
+  gcloud container clusters delete ${container_async} --zone=${zone} --quiet
+
+  message_if_error "Error deleting reactive cluster...exiting."
+else
+  echo "Reactive container doesn't exist"
+fi
+
+
+has_jmeter_container=$(gcloud container clusters list --format="get(name)" \
+  --filter="name=${container_jmeter}")
+if [ -n "${has_jmeter_container}" ]
+then
+  echo "JMeter container..."
+  gcloud container clusters delete ${container_jmeter} --zone=${zone} --quiet
+
+  message_if_error "Error deleting JMeter cluster...exiting."
+else
+  echo "JMeter container doesn't exist"
+fi
+
+
+is_service_account_binded=$(gcloud projects get-iam-policy ${gc_project} \
+  --flatten="bindings[].members[]" --format="get(bindings.members)" \
+  --filter="bindings.members:serviceAccount:${jmeter_service_account}* AND \
+            bindings.role:roles/storage.admin")
+if [ -n "${is_service_account_binded}" ]
+then
+  echo "JMeter service account binding"
+  gcloud projects remove-iam-policy-binding ${gc_project} \
+    --member serviceAccount:${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com \
+    --role roles/storage.admin \
+    --quiet
+
+  message_if_error "Error removing binding from service account...exiting."
+else
+  echo "Role not assigned to service account."
+fi
+
+
+has_jmeter_service_account=$(gcloud iam service-accounts list --format="get(email)" \
+--filter="email:${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com")
+if [ -n "${has_jmeter_service_account}" ]
+then
+  echo "JMeter service account"
+  gcloud iam service-accounts delete ${jmeter_service_account}@${gc_project}.iam.gserviceaccount.com --quiet
+
+  message_if_error "Error deleting JMeter service account...exiting."
+else
+  echo "JMeter service account doesn't exist"
+fi
+
+
+has_bucket=false
+for bucket in $(gsutil ls gs://);
+do
+  if [ "${bucket}" = "gs://jmeter-bucket-${gc_project}/" ];
+  then
+    has_bucket=true
+  fi
+done
+
+
+if [ "${has_bucket}" = true ];
+then
+  gsutil rm -r gs://jmeter-bucket-${gc_project}/
+
+  message_if_error "Error removing JMeter bucket...exiting."
+else
+  echo "JMeter bucket doesn't exist"
+fi

@@ -1,26 +1,24 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: server-sync
+  name: %%APP_SERVER%%
   labels:
-    app: server-sync
+    app: %%APP_SERVER%%
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: server-sync
+      app: %%APP_SERVER%%
   template:
     metadata:
       labels:
-        app: server-sync
+        app: %%APP_SERVER%%
     spec:
       containers:
-      - name: server-sync
-        image: gcr.io/%%GC_PROJECT%%/rvss-server-sync:latest
+      - name: %%APP_SERVER%%
+        image: %%IMAGE_PREFIX%%/%%IMAGE_NAME%%:%%IMAGE_TAG%%
         env:
-        - name: MONGODB_HOST
-          value: mongodb-sync
         - name: BACKEND_HOST
-          value: backend-sync
+          value: %%APP_BACKEND%%
         ports:
         - containerPort: 8080

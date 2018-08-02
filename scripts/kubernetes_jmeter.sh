@@ -51,14 +51,18 @@ gcloud container clusters get-credentials ${container_jmeter} --zone=${zone}
 message_if_error "Error getting auth...exiting."
 
 
-has_dep_jmeter_sync=$(kubectl get jobs --field-selector='metadata.name=sync-jmeter' \
+has_dep_jmeter_sync=$(kubectl get jobs --field-selector='metadata.name=${app_jmeter_sync}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_jmeter_sync}" ]
 then
   echo "Creating JMeter for the synchronous server"
-  cat ${basedir}/../kubernetes/jmeter/jmeter-sync.yml | \
+  cat ${basedir}/../kubernetes/deployment/jmeter.yml | \
+    sed "s/%%APP_JMETER%%/${app_jmeter_sync}/" | \
     sed "s/%%SERVER_HOST%%/${SERVER_SYNC_IP}/" | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_jmeter}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
+    sed "s/%%REPORT_NAME%%/${jmeter_report_sync}/" | \
     sed "s/%%BUCKET_NAME%%/jmeter-bucket-${gc_project}/" | \
     kubectl create -f -
 
@@ -77,14 +81,18 @@ kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | \
   done
 
 
-has_dep_jmeter_async=$(kubectl get jobs --field-selector='metadata.name=async-jmeter' \
+has_dep_jmeter_async=$(kubectl get jobs --field-selector='metadata.name=${app_jmeter_async}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_jmeter_async}" ]
 then
   echo "Creating JMeter for the reactive server"
-  cat ${basedir}/../kubernetes/jmeter/jmeter-async.yml | \
+  cat ${basedir}/../kubernetes/deployment/jmeter.yml | \
+    sed "s/%%APP_JMETER%%/${app_jmeter_async}/" | \
     sed "s/%%SERVER_HOST%%/${SERVER_ASYNC_IP}/" | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_jmeter}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
+    sed "s/%%REPORT_NAME%%/${jmeter_report_async}/" | \
     sed "s/%%BUCKET_NAME%%/jmeter-bucket-${gc_project}/" | \
     kubectl create -f -
 

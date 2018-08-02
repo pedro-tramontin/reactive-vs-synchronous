@@ -51,13 +51,16 @@ gcloud container clusters get-credentials ${container_sync} --zone=${zone}
 message_if_error "Error getting auth...exiting."
 
 
-has_dep_back_sync=$(kubectl get deployments --field-selector='metadata.name=backend-sync' \
+has_dep_back_sync=$(kubectl get deployments --field-selector='metadata.name=${app_backend_sync}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_back_sync}" ]
 then
   echo "Creating synchronous backend deployment"
-  cat ${basedir}/../kubernetes/sync/deployment-backend.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/deployment/backend.yml | \
+    sed "s/%%APP_BACKEND%%/${app_backend_sync}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_backend}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating synchronous backend...exiting."
@@ -66,13 +69,13 @@ else
 fi
 
 
-has_dep_svc_back_sync=$(kubectl get services --field-selector='metadata.name=backend-sync' \
+has_dep_svc_back_sync=$(kubectl get services --field-selector='metadata.name=${app_backend_sync}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_svc_back_sync}" ]
 then
   echo "Creating service for synchronous backend"
-  cat ${basedir}/../kubernetes/sync/service-backend.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/service/backend.yml | \
+    sed "s/%%APP_BACKEND%%/${app_backend_sync}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating service...exiting."
@@ -81,13 +84,17 @@ else
 fi
 
 
-has_dep_server_sync=$(kubectl get deployments --field-selector='metadata.name=server-sync' \
+has_dep_server_sync=$(kubectl get deployments --field-selector='metadata.name=${app_server_sync}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_server_sync}" ]
 then
   echo "Creating synchronous server deployment"
-  cat ${basedir}/../kubernetes/sync/deployment-server.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/deployment/server.yml | \
+    sed "s/%%APP_SERVER%%/${app_server_sync}/" | \
+    sed "s/%%APP_BACKEND%%/${app_backend_sync}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_sync}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating synchronous server...exiting."
@@ -96,13 +103,13 @@ else
 fi
 
 
-has_dep_svc_server_sync=$(kubectl get services --field-selector='metadata.name=server-sync' \
+has_dep_svc_server_sync=$(kubectl get services --field-selector='metadata.name=${app_server_sync}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_svc_server_sync}" ]
 then
   echo "Creating service for the synchronous server"
-  cat ${basedir}/../kubernetes/sync/service-server.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/service/server.yml | \
+    sed "s/%%APP_SERVER%%/${app_server_sync}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating service...exiting."
@@ -114,3 +121,4 @@ fi
 get_service_external_ip server-sync SERVER_SYNC_IP
 
 echo "Sync server external IP: ${SERVER_SYNC_IP}"
+

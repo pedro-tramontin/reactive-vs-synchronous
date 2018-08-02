@@ -1,17 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: async-jmeter
+  name: %%APP_JMETER%%
   labels:
-    app: async-jmeter
+    app: %%APP_JMETER%%
 spec:
   template:
     metadata:
-      name: async-jmeter
+      name: %%APP_JMETER%%
     spec:
       containers:
-        - image: gcr.io/%%GC_PROJECT%%/rvss-jmeter:latest
-          name: async-jmeter
+        - image: %%IMAGE_PREFIX%%/%%IMAGE_NAME%%:%%IMAGE_TAG%%
+          name: %%APP_JMETER%%
           env:
           - name: SERVER_HOST
             value: %%SERVER_HOST%%
@@ -26,5 +26,5 @@ spec:
           - name: BUCKET_NAME
             value: "%%BUCKET_NAME%%"
           - name: REPORT_NAME
-            value: "async"
+            value: "%%REPORT_NAME%%"
       restartPolicy: Never

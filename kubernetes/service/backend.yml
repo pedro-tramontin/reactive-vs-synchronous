@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-async
+  name: %%APP_BACKEND%%
 spec:
   selector:
-    app: backend-async
+    app: %%APP_BACKEND%%
   ports:
     - protocol: TCP
       port: 8080

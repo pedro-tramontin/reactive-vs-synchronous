@@ -5,22 +5,17 @@ basedir=$(dirname -- "$0")
 source ${basedir}/utils.sh
 
 
-usage="$(basename "$0") PROJECT_ID [-q] [-h]
+usage="$(basename "$0") PROJECT_ID [-h]
 
 Creates a project in Google Cloud
 
 where:
     [PROJECT_ID] ID for the project to be created
 
-    -q  don't ask for user input
     -h  show this help text"
-
-quiet=false
 
 while getopts ':hq' option; do
   case "$option" in
-    q) quiet=true
-       ;;
     h|*) echo "$usage"
        exit
        ;;

@@ -40,6 +40,6 @@ gsutil cp gs://jmeter-bucket-${gc_project}/sync.tar.gz ${output_dir}
 message_if_error "Error downloading sync report...exiting."
 
 
-gsutil cp gs://jmeter-bucket-${gc_project}/async.tar.gz ${output_dir}
+gsutil cp gs://jmeter-bucket-${gc_project}/react.tar.gz ${output_dir}
 
 message_if_error "Error downloading reactive report...exiting."

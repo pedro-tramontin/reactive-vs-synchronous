@@ -51,13 +51,16 @@ gcloud container clusters get-credentials ${container_async} --zone=${zone}
 message_if_error "Error getting auth...exiting."
 
 
-has_dep_back_async=$(kubectl get deployments --field-selector='metadata.name=backend-async' \
+has_dep_back_async=$(kubectl get deployments --field-selector='metadata.name=${app_backend_async}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_back_async}" ]
 then
   echo "Creating reactive backend deployment"
-  cat ${basedir}/../kubernetes/async/deployment-backend.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/deployment/backend.yml | \
+    sed "s/%%APP_BACKEND%%/${app_backend_async}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_backend}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating reactive backend...exiting."
@@ -66,13 +69,13 @@ else
 fi
 
 
-has_dep_svc_back_async=$(kubectl get services --field-selector='metadata.name=backend-async' \
+has_dep_svc_back_async=$(kubectl get services --field-selector='metadata.name=${app_backend_async}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_svc_back_async}" ]
 then
   echo "Creating service for reactive backend"
-  cat ${basedir}/../kubernetes/async/service-backend.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/service/backend.yml | \
+    sed "s/%%APP_BACKEND%%/${app_backend_async}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating service...exiting."
@@ -81,13 +84,17 @@ else
 fi
 
 
-has_dep_server_async=$(kubectl get deployments --field-selector='metadata.name=server-async' \
+has_dep_server_async=$(kubectl get deployments --field-selector='metadata.name=${app_server_async}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_server_async}" ]
 then
   echo "Creating reactive server deployment"
-  cat ${basedir}/../kubernetes/async/deployment-server.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/deployment/server.yml | \
+    sed "s/%%APP_SERVER%%/${app_server_async}/" | \
+    sed "s/%%APP_BACKEND%%/${app_backend_async}/" | \
+    sed "s#%%IMAGE_PREFIX%%#${image_prefix}#" | \
+    sed "s/%%IMAGE_NAME%%/${project_async}/" | \
+    sed "s/%%IMAGE_TAG%%/${docker_tag}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating reactive server...exiting."
@@ -96,13 +103,13 @@ else
 fi
 
 
-has_dep_svc_server_async=$(kubectl get services --field-selector='metadata.name=server-async' \
+has_dep_svc_server_async=$(kubectl get services --field-selector='metadata.name=${app_server_async}' \
   -o jsonpath='{.items[*].metadata.name}')
 if [ -z "${has_dep_svc_server_async}" ]
 then
   echo "Creating service for the reactive server"
-  cat ${basedir}/../kubernetes/async/service-server.yml | \
-    sed "s/%%GC_PROJECT%%/${gc_project}/" | \
+  cat ${basedir}/../kubernetes/service/server.yml | \
+    sed "s/%%APP_SERVER%%/${app_server_async}/" | \
     kubectl create -f -
 
   message_if_error  "Error creating service...exiting."

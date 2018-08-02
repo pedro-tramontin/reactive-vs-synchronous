@@ -96,14 +96,5 @@ then
 
   message_if_error "JMeter cluster creation error...exiting."
 else
-  echo "JMeter conainer already exists"
+  echo "JMeter container already exists"
 fi
-
-
-#gsutil mb gs://jmeter-bucket-${gc_project}
-
-#if [ $? -ne 0 ]
-#then
-#  echo "JMeter bucket creation error...exiting."
-#  exit $?
-#fi

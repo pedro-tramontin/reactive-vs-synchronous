@@ -5,6 +5,11 @@ basedir=$(dirname -- "$0")
 source ${basedir}/config.sh
 
 
+source ${basedir}/create_project.sh ${gc_project}
+
+message_if_error "Error creating project...exiting."
+
+
 source ${basedir}/build_deploy_images.sh
 
 message_if_error "Error building and deploying images...exiting."
